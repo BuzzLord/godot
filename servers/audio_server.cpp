@@ -43,6 +43,7 @@
 #include "scene/scene_string_names.h"
 #include "servers/audio/audio_driver_dummy.h"
 #include "servers/audio/effects/audio_effect_compressor.h"
+#include "servers/audio/effects/audio_effect_pass_through.h"
 
 #include <cstring>
 
@@ -1005,9 +1006,14 @@ void AudioServer::_update_bus_effects(int p_bus) {
 	for (int i = 0; i < buses[p_bus]->channels.size(); i++) {
 		buses.write[p_bus]->channels.write[i].effect_instances.resize(buses[p_bus]->effects.size());
 		for (int j = 0; j < buses[p_bus]->effects.size(); j++) {
-			Ref<AudioEffectInstance> fx = buses.write[p_bus]->effects.write[j].effect->instantiate();
-			if (Object::cast_to<AudioEffectCompressorInstance>(*fx)) {
-				Object::cast_to<AudioEffectCompressorInstance>(*fx)->set_current_channel(i);
+			Ref<AudioEffectInstance> fx;
+			if (buses[p_bus]->effects[j].effect->should_instantiate(i)) {
+				fx = buses.write[p_bus]->effects.write[j].effect->instantiate();
+				if (Object::cast_to<AudioEffectCompressorInstance>(*fx)) {
+					Object::cast_to<AudioEffectCompressorInstance>(*fx)->set_current_channel(i);
+				}
+			} else {
+				fx = AudioEffectPassThrough::instantiate();
 			}
 			buses.write[p_bus]->channels.write[i].effect_instances.write[j] = fx;
 		}

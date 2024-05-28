@@ -58,6 +58,7 @@ protected:
 
 public:
 	virtual Ref<AudioEffectInstance> instantiate();
+	virtual bool should_instantiate(int p_channel) const { return true; };
 	AudioEffect();
 };
 

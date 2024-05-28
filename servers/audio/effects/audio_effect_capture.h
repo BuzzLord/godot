@@ -66,6 +66,7 @@ protected:
 
 public:
 	virtual Ref<AudioEffectInstance> instantiate() override;
+	bool should_instantiate(int p_channel) const override;
 
 	void set_buffer_length(float p_buffer_length_seconds);
 	float get_buffer_length();

@@ -90,6 +90,10 @@ Ref<AudioEffectInstance> AudioEffectCapture::instantiate() {
 	return ins;
 }
 
+bool AudioEffectCapture::should_instantiate(int p_channel) const {
+	return p_channel == 0;
+}
+
 void AudioEffectCapture::set_buffer_length(float p_buffer_length_seconds) {
 	buffer_length_seconds = p_buffer_length_seconds;
 }

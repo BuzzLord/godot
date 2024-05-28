@@ -160,6 +160,10 @@ Ref<AudioEffectInstance> AudioEffectRecord::instantiate() {
 	return ins;
 }
 
+bool AudioEffectRecord::should_instantiate(int p_channel) const {
+	return p_channel == 0;
+}
+
 void AudioEffectRecord::ensure_thread_stopped() {
 	if (current_instance != nullptr) {
 		current_instance->finish();
