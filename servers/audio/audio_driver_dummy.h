@@ -58,6 +58,8 @@ class AudioDriverDummy : public AudioDriver {
 
 	static AudioDriverDummy *singleton;
 
+	SpeakerMode _get_configured_speaker_mode() const;
+
 public:
 	virtual const char *get_name() const override {
 		return "Dummy";

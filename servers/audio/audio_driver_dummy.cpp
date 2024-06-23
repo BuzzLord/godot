@@ -36,6 +36,9 @@
 AudioDriverDummy *AudioDriverDummy::singleton = nullptr;
 
 Error AudioDriverDummy::init() {
+	const Variant default_speaker_mode = (int)SPEAKER_MODE_STEREO;
+	GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::INT, "audio/driver/speaker_mode", PROPERTY_HINT_ENUM, "Stereo,Surround 3.1,Surround 5.1,Surround 7.1"), default_speaker_mode);
+
 	active.clear();
 	exit_thread.clear();
 	samples_in = nullptr;
@@ -43,6 +46,8 @@ Error AudioDriverDummy::init() {
 	if (mix_rate == -1) {
 		mix_rate = _get_configured_mix_rate();
 	}
+
+	speaker_mode = _get_configured_speaker_mode();
 
 	channels = get_channels();
 	samples_in = memnew_arr(int32_t, (size_t)buffer_frames * channels);
@@ -107,8 +112,28 @@ void AudioDriverDummy::set_mix_rate(int p_rate) {
 }
 
 uint32_t AudioDriverDummy::get_channels() const {
-	static const int channels_for_mode[4] = { 2, 4, 8, 16 };
+	static const int channels_for_mode[4] = { 2, 4, 6, 8 };
 	return channels_for_mode[speaker_mode];
+}
+
+AudioDriver::SpeakerMode AudioDriverDummy::_get_configured_speaker_mode() const {
+	StringName audio_driver_setting = "audio/driver/speaker_mode";
+	int mode = GLOBAL_GET(audio_driver_setting);
+
+	switch (mode) {
+		case 0:
+			return SPEAKER_MODE_STEREO;
+		case 1:
+			return SPEAKER_SURROUND_31;
+		case 2:
+			return SPEAKER_SURROUND_51;
+		case 3:
+			return SPEAKER_SURROUND_71;
+	}
+
+	WARN_PRINT(vformat("Invalid speaker_mode of %d, consider reassigning setting \'%s\'. \nDefaulting to stereo mode: 0.", mode, audio_driver_setting));
+
+	return SPEAKER_MODE_STEREO;
 }
 
 void AudioDriverDummy::mix_audio(int p_frames, int32_t *p_buffer) {
