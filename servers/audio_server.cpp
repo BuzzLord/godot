@@ -293,12 +293,14 @@ void AudioServer::_driver_process(int p_frames, int32_t *p_buffer) {
 			// The destination start for data will be the same in all cases.
 			int32_t *dest = &p_buffer[from_buf * (cs * 2) + (k * 2)];
 
+			int rk = channel_remap[k];
+
 #ifdef DEBUG_ENABLED
-			if (!debug_mute && k < mcs && master->channels[k].active) {
+			if (!debug_mute && rk < mcs && master->channels[rk].active) {
 #else
-			if (k < mcs && master->channels[k].active) {
+			if (rk < mcs && master->channels[rk].active) {
 #endif // DEBUG_ENABLED
-				const AudioFrame *buf = master->channels[k].buffer.ptr();
+				const AudioFrame *buf = master->channels[rk].buffer.ptr();
 
 				for (int j = 0; j < to_copy; j++) {
 					float l = CLAMP(buf[from + j].left, -1.0, 1.0);
@@ -1504,6 +1506,38 @@ int AudioServer::get_driver_channel_count() const {
 	ERR_FAIL_V(1);
 }
 
+void AudioServer::set_channel_remap(int p_output_channel, int p_source_channel) {
+	ERR_FAIL_INDEX_MSG(p_output_channel, MAX_CHANNELS_PER_BUS, "Invalid output channel, out of range");
+	bool remap_changed;
+
+	lock();
+	if (p_source_channel < 0 || p_source_channel > MAX_CHANNELS_PER_BUS) {
+		remap_changed = channel_remap[p_output_channel] != MAX_CHANNELS_PER_BUS;
+
+		// Source channels outside valid range will get muted.
+		channel_remap[p_output_channel] = MAX_CHANNELS_PER_BUS;
+	} else {
+		remap_changed = channel_remap[p_output_channel] != p_source_channel;
+		channel_remap[p_output_channel] = p_source_channel;
+	}
+	unlock();
+
+	if (remap_changed) {
+		print_verbose(vformat("AudioServer: channel remap changed: output channel [%d] -> source channel [%d]", p_output_channel, channel_remap[p_output_channel]))
+	}
+}
+
+int AudioServer::get_channel_remap(int p_output_channel) const {
+	ERR_FAIL_INDEX_V_MSG(p_output_channel, MAX_CHANNELS_PER_BUS, -1, "Invalid output channel, out of range");
+	return channel_remap[p_output_channel] == MAX_CHANNELS_PER_BUS ? -1 : channel_remap[p_output_channel];
+}
+
+void AudioServer::init_channel_remap() {
+	for (int i = 0; i < MAX_CHANNELS_PER_BUS; i++) {
+		channel_remap[i] = i;
+	}
+}
+
 void AudioServer::notify_listener_changed() {
 	for (CallbackItem *ci : listener_changed_callback_list) {
 		ci->callback(ci->userdata);
@@ -1536,6 +1570,7 @@ void AudioServer::init() {
 	channel_disable_frames = float(GLOBAL_DEF_RST(PropertyInfo(Variant::FLOAT, "audio/buses/channel_disable_time", PROPERTY_HINT_RANGE, "0,5,0.01,or_greater"), 2.0)) * get_mix_rate();
 
 	speaker_mode_config = GLOBAL_DEF(PropertyInfo(Variant::INT, "audio/general/speaker_mode", PROPERTY_HINT_ENUM, "Default:-1,Stereo:0,Surround 3.1:1,Surround 5.1:2,Surround 7.1:3"), -1);
+	init_channel_remap();
 
 	// TODO: Buffer size is hardcoded for now. This would be really nice to have as a project setting because currently it limits audio latency to an absolute minimum of 11ms with default mix rate, but there's some additional work required to make that happen. See TODOs in `_mix_step_for_channel`.
 	// When this becomes a project setting, it should be specified in milliseconds rather than raw sample count, because 512 samples at 192khz is shorter than it is at 48khz, for example.
@@ -2047,6 +2082,9 @@ void AudioServer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_bus_effect_enabled", "bus_idx", "effect_idx", "enabled"), &AudioServer::set_bus_effect_enabled);
 	ClassDB::bind_method(D_METHOD("is_bus_effect_enabled", "bus_idx", "effect_idx"), &AudioServer::is_bus_effect_enabled);
+
+	ClassDB::bind_method(D_METHOD("set_channel_remap", "output_channel", "source_channel"), &AudioServer::set_channel_remap);
+	ClassDB::bind_method(D_METHOD("get_channel_remap", "output_channel"), &AudioServer::get_channel_remap);
 
 	ClassDB::bind_method(D_METHOD("get_bus_peak_volume_left_db", "bus_idx", "channel"), &AudioServer::get_bus_peak_volume_left_db);
 	ClassDB::bind_method(D_METHOD("get_bus_peak_volume_right_db", "bus_idx", "channel"), &AudioServer::get_bus_peak_volume_right_db);

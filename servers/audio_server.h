@@ -225,6 +225,7 @@ private:
 	int to_mix = 0;
 
 	int speaker_mode_config = -1;
+	int channel_remap[MAX_CHANNELS_PER_BUS];
 
 	float playback_speed_scale = 1.0f;
 
@@ -329,6 +330,7 @@ private:
 	static AudioServer *singleton;
 
 	void init_channels_and_buffers();
+	void init_channel_remap();
 
 	void _mix_step();
 	void _mix_step_for_channel(AudioFrame *p_out_buf, AudioFrame *p_source_buf, AudioFrame p_vol_start, AudioFrame p_vol_final, float p_attenuation_filter_cutoff_hz, float p_highshelf_gain, AudioFilterSW::Processor *p_processor_l, AudioFilterSW::Processor *p_processor_r);
@@ -429,6 +431,9 @@ public:
 	float get_bus_peak_volume_right_db(int p_bus, int p_channel) const;
 
 	bool is_bus_channel_active(int p_bus, int p_channel) const;
+
+	void set_channel_remap(int p_output_channel, int p_source_channel);
+	int get_channel_remap(int p_output_channel) const;
 
 	void set_playback_speed_scale(float p_scale);
 	float get_playback_speed_scale() const;
