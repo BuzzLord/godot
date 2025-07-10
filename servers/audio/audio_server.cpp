@@ -2015,7 +2015,7 @@ void AudioServer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_input_device_list"), &AudioServer::get_input_device_list);
 	ClassDB::bind_method(D_METHOD("get_input_device"), &AudioServer::get_input_device);
-	ClassDB::bind_method(D_METHOD("set_input_device", "name"), &AudioServer::set_input_device);
+	// ClassDB::bind_method(D_METHOD("set_input_device", "name"), &AudioServer::set_input_device); // Only set through MicrophoneServer/MicrophoneFeed now.
 
 	ClassDB::bind_method(D_METHOD("set_bus_layout", "bus_layout"), &AudioServer::set_bus_layout);
 	ClassDB::bind_method(D_METHOD("generate_bus_layout"), &AudioServer::generate_bus_layout);
@@ -2027,7 +2027,7 @@ void AudioServer::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "bus_count"), "set_bus_count", "get_bus_count");
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "output_device"), "set_output_device", "get_output_device");
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_device"), "set_input_device", "get_input_device");
+	//ADD_PROPERTY(PropertyInfo(Variant::STRING, "input_device"), "set_input_device", "get_input_device");
 	// The default value may be set to an empty string by the platform-specific audio driver.
 	// Override for class reference generation purposes.
 	ADD_PROPERTY_DEFAULT("input_device", "Default");

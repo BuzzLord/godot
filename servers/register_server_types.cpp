@@ -53,6 +53,8 @@
 #include "audio/effects/audio_effect_spectrum_analyzer.h"
 #include "audio/effects/audio_effect_stereo_enhance.h"
 #include "audio/effects/audio_stream_generator.h"
+#include "audio/microphone/microphone_feed.h"
+#include "audio/microphone_server.h"
 #include "camera/camera_feed.h"
 #include "camera/camera_server.h"
 #include "debugger/servers_debugger.h"
@@ -160,6 +162,7 @@ void register_server_types() {
 	GDREGISTER_CLASS(NativeMenu);
 
 	GDREGISTER_CLASS(CameraServer);
+	GDREGISTER_CLASS(MicrophoneServer);
 
 	GDREGISTER_ABSTRACT_CLASS(RenderingDevice);
 
@@ -255,6 +258,7 @@ void register_server_types() {
 	GDREGISTER_CLASS(UniformSetCacheRD);
 
 	GDREGISTER_CLASS(CameraFeed);
+	GDREGISTER_CLASS(MicrophoneFeed);
 
 	GDREGISTER_VIRTUAL_CLASS(MovieWriter);
 
@@ -370,6 +374,7 @@ void register_server_singletons() {
 	Engine::get_singleton()->add_singleton(Engine::Singleton("AudioServer", AudioServer::get_singleton(), "AudioServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("CameraServer", CameraServer::get_singleton(), "CameraServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("DisplayServer", DisplayServer::get_singleton(), "DisplayServer"));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("MicrophoneServer", MicrophoneServer::get_singleton(), "MicrophoneServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("NativeMenu", NativeMenu::get_singleton(), "NativeMenu"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("RenderingServer", RenderingServer::get_singleton(), "RenderingServer"));
 #ifndef NAVIGATION_2D_DISABLED

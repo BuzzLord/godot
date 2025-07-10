@@ -33,6 +33,7 @@
 #include "core/io/resource.h"
 #include "scene/property_list_helper.h"
 #include "servers/audio/audio_server.h"
+#include "servers/audio/microphone/microphone_feed.h"
 
 #include "core/object/gdvirtual.gen.inc"
 #include "core/variant/native_ptr.h"
@@ -243,6 +244,7 @@ class AudioStreamPlaybackMicrophone : public AudioStreamPlaybackResampled {
 	unsigned int input_ofs = 0;
 
 	Ref<AudioStreamMicrophone> microphone;
+	Ref<MicrophoneFeed> microphone_feed;
 
 protected:
 	virtual int _mix_internal(AudioFrame *p_buffer, int p_frames) override;
